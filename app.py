@@ -34,9 +34,10 @@ def procesar_planilla_brou(file_data, fecha_desde=None):
         df_out = pd.DataFrame()
 
         # --- Procesamiento de FECHA (Columna A) ---
+        # Validar y formatear fecha, retornando None si no es válida
         def format_fecha(val):
             if pd.isna(val): 
-                return ""
+                return None
             if isinstance(val, (pd.Timestamp, datetime.datetime)):
                 return val.strftime('%d/%m/%Y')
             if isinstance(val, (float, int)):
@@ -45,8 +46,17 @@ def procesar_planilla_brou(file_data, fecha_desde=None):
                     delta = datetime.timedelta(days=float(val))
                     return (base_date + delta).strftime('%d/%m/%Y')
                 except:
-                    return str(val)
-            return str(val)
+                    return None
+            # Si es string, intentar parsear
+            if isinstance(val, str):
+                val_stripped = val.strip()
+                for fmt in ['%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y']:
+                    try:
+                        dt = datetime.datetime.strptime(val_stripped, fmt)
+                        return dt.strftime('%d/%m/%Y')
+                    except:
+                        continue
+            return None
 
         df_out['fecha'] = df_data['Fecha'].apply(format_fecha)
 
@@ -60,8 +70,8 @@ def procesar_planilla_brou(file_data, fecha_desde=None):
         # --- Procesamiento de COTIZACIÓN ---
         df_out['cotizacion'] = 0.0
 
-        # 5. Eliminar filas sin fecha válida (evita basura al final del archivo)
-        df_out = df_out[df_out['fecha'] != ''].copy()
+        # 5. Eliminar filas sin fecha válida (skipea filas que no tienen fecha)
+        df_out = df_out[df_out['fecha'].notna()].copy()
 
         # 6. Filtrar por fecha si se especificó
         if fecha_desde:
@@ -125,9 +135,10 @@ def procesar_planilla_itau(file_data, fecha_desde=None):
         df_out = pd.DataFrame()
 
         # --- Procesamiento de FECHA (Columna 1) ---
+        # Validar y formatear fecha, retornando None si no es válida
         def format_fecha(val):
             if pd.isna(val): 
-                return ""
+                return None
             if isinstance(val, (pd.Timestamp, datetime.datetime)):
                 return val.strftime('%d/%m/%Y')
             if isinstance(val, (float, int)):
@@ -136,7 +147,7 @@ def procesar_planilla_itau(file_data, fecha_desde=None):
                     delta = datetime.timedelta(days=float(val))
                     return (base_date + delta).strftime('%d/%m/%Y')
                 except:
-                    return str(val)
+                    return None
             # Intentar parsear formato DD/MM/YYYY
             if isinstance(val, str):
                 val = val.strip()
@@ -146,7 +157,7 @@ def procesar_planilla_itau(file_data, fecha_desde=None):
                         return dt.strftime('%d/%m/%Y')
                     except:
                         continue
-            return str(val)
+            return None
 
         df_out['fecha'] = df_data[1].apply(format_fecha)
 
@@ -163,7 +174,7 @@ def procesar_planilla_itau(file_data, fecha_desde=None):
         # 5. Filtrar filas que no son movimientos (SALDO ANTERIOR, SALDO FINAL, filas vacías)
         # Eliminamos filas sin fecha válida, con "SALDO" o vacías sin movimientos
         df_out = df_out[
-            (df_out['fecha'] != '') &  # Debe tener fecha válida
+            (df_out['fecha'].notna()) &  # Debe tener fecha válida
             ~(df_out['descripcion'].str.upper().str.contains('SALDO ANTERIOR|SALDO FINAL', na=False)) &
             ~((df_out['descripcion'] == '') & (df_out['credito'] == 0) & (df_out['debito'] == 0))
         ].copy()

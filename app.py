@@ -223,28 +223,20 @@ with col_banco2:
     )
 
 # Instrucciones dinámicas según el banco
-with st.expander("ℹ️ Instrucciones de uso"):
+with st.expander("ℹ️ Información"):
     if banco_seleccionado == "BROU":
         st.markdown("""
         **BROU - Banco República**
-        1. Descarga tu extracto de movimientos desde el sitio web del BROU (.xls o .xlsx)
-        2. Sube el archivo aquí
-        3. Opcionalmente, selecciona una fecha de inicio para filtrar los movimientos
-        4. Haz clic en 'Procesar'
-        5. Descarga el archivo procesado
-        6. Importa el archivo en **Finanzas Personales de ZetaSoftware**
+        
+        Descarga tu extracto de movimientos desde el sitio web del BROU en formato .xls o .xlsx y súbelo aquí.
+        El procesador convertirá automáticamente el formato al compatible con Finanzas Personales de ZetaSoftware.
         """)
     else:
         st.markdown("""
         **Banco Itaú**
-        1. Descarga tu extracto detallado desde el sitio web de Itaú (.xls, .xlsx o .csv)
-        2. Sube el archivo aquí
-        3. Opcionalmente, selecciona una fecha de inicio para filtrar los movimientos
-        4. Haz clic en 'Procesar'
-        5. Descarga el archivo procesado
-        6. Importa el archivo en **Finanzas Personales de ZetaSoftware**
         
-        *Nota: El procesador detecta automáticamente las columnas de fecha, descripción, crédito y débito*
+        Descarga tu extracto detallado desde el sitio web de Itaú en formato .xls, .xlsx o .csv y súbelo aquí.
+        El procesador detecta automáticamente las columnas y convierte al formato compatible con Finanzas Personales de ZetaSoftware.
         """)
 
 st.markdown("---")

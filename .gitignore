@@ -1,0 +1,38 @@
+# Ignorar entorno virtual
+env/
+venv/
+.venv/
+
+# Ignorar archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Ignorar archivos de datos de prueba
+*.xls
+*.xlsx
+*.csv
+!requirements.txt
+
+# Ignorar archivos del sistema
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Ignorar archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignorar archivos de log
+*.log
+
+# Ignorar archivos temporales
+*.tmp
+*.bak
+*.backup

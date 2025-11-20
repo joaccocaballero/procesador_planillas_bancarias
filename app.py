@@ -287,13 +287,6 @@ if uploaded_file is not None:
             if df_resultado is not None and len(df_resultado) > 0:
                 st.success(f"✅ ¡Procesamiento exitoso! {len(df_resultado)} registros procesados")
                 
-                # Vista previa
-                st.subheader("Vista previa del resultado")
-                st.dataframe(df_resultado.head(10), use_container_width=True)
-                
-                if len(df_resultado) > 10:
-                    st.info(f"Mostrando 10 de {len(df_resultado)} registros")
-                
                 # Convertir a Excel en memoria
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -309,6 +302,12 @@ if uploaded_file is not None:
                     type="primary",
                     use_container_width=True
                 )
+                
+                # Vista previa compacta
+                with st.expander("👁️ Ver vista previa de los datos", expanded=False):
+                    st.dataframe(df_resultado.head(10), use_container_width=True)
+                    if len(df_resultado) > 10:
+                        st.caption(f"Mostrando 10 de {len(df_resultado)} registros")
             elif df_resultado is not None:
                 st.warning("⚠️ No se encontraron registros que cumplan con los criterios de filtrado")
 

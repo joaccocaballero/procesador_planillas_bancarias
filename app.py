@@ -60,7 +60,10 @@ def procesar_planilla_brou(file_data, fecha_desde=None):
         # --- Procesamiento de COTIZACIÓN ---
         df_out['cotizacion'] = 0.0
 
-        # 5. Filtrar por fecha si se especificó
+        # 5. Eliminar filas sin fecha válida (evita basura al final del archivo)
+        df_out = df_out[df_out['fecha'] != ''].copy()
+
+        # 6. Filtrar por fecha si se especificó
         if fecha_desde:
             def parse_fecha(fecha_str):
                 try:
@@ -72,7 +75,7 @@ def procesar_planilla_brou(file_data, fecha_desde=None):
             df_out = df_out[df_out['fecha_dt'] >= fecha_desde].copy()
             df_out = df_out.drop('fecha_dt', axis=1)
 
-        # 6. Ordenar columnas
+        # 7. Ordenar columnas
         columnas_ordenadas = ['fecha', 'descripcion', 'credito', 'debito', 'cotizacion']
         df_final = df_out[columnas_ordenadas]
 
@@ -158,11 +161,11 @@ def procesar_planilla_itau(file_data, fecha_desde=None):
         df_out['cotizacion'] = 0.0
 
         # 5. Filtrar filas que no son movimientos (SALDO ANTERIOR, SALDO FINAL, filas vacías)
-        # Eliminamos filas donde la descripción contiene "SALDO" o está vacía y no hay crédito ni débito
+        # Eliminamos filas sin fecha válida, con "SALDO" o vacías sin movimientos
         df_out = df_out[
+            (df_out['fecha'] != '') &  # Debe tener fecha válida
             ~(df_out['descripcion'].str.upper().str.contains('SALDO ANTERIOR|SALDO FINAL', na=False)) &
-            ~((df_out['descripcion'] == '') & (df_out['credito'] == 0) & (df_out['debito'] == 0)) &
-            (df_out['fecha'] != '')
+            ~((df_out['descripcion'] == '') & (df_out['credito'] == 0) & (df_out['debito'] == 0))
         ].copy()
 
         # 6. Filtrar por fecha si se especificó

@@ -198,7 +198,12 @@ def procesar_planilla_itau(file_data, fecha_desde=None):
 st.set_page_config(
     page_title="Procesador de Planillas Bancarias - Finanzas Personales",
     page_icon="🏦",
-    layout="centered"
+    layout="wide",
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': None
+    }
 )
 
 st.title("🏦 Procesador de Planillas Bancarias")
@@ -208,57 +213,32 @@ st.markdown("---")
 # Información del propósito
 st.info("💡 **Propósito**: Convierte planillas de movimientos extraídas de BROU e Itaú al formato compatible con el software Finanzas Personales de ZetaSoftware.")
 
-# Aviso de privacidad
-st.success("🔒 **Privacidad garantizada**: Todos los archivos se procesan únicamente en memoria. No se guarda ningún dato en el servidor ni localmente. Tu información permanece 100% privada.")
-
-# Selector de banco
-col_banco1, col_banco2 = st.columns([1, 3])
-
-with col_banco1:
-    st.markdown("### Banco:")
-
-with col_banco2:
-    banco_seleccionado = st.selectbox(
-        "Selecciona tu banco",
-        ["BROU", "Itaú"],
-        label_visibility="collapsed",
-        help="Elige el banco del cual proviene tu archivo de movimientos"
-    )
-
-# Instrucciones dinámicas según el banco
-with st.expander("ℹ️ Información"):
-    if banco_seleccionado == "BROU":
-        st.markdown("""
-        **BROU - Banco República**
-        
-        Descarga tu extracto de movimientos desde el sitio web del BROU en formato .xls o .xlsx y súbelo aquí.
-        El procesador convertirá automáticamente el formato al compatible con Finanzas Personales de ZetaSoftware.
-        """)
-    else:
-        st.markdown("""
-        **Banco Itaú**
-        
-        Descarga tu extracto detallado desde el sitio web de Itaú en formato .xls, .xlsx o .csv y súbelo aquí.
-        El procesador detecta automáticamente las columnas y convierte al formato compatible con Finanzas Personales de ZetaSoftware.
-        """)
-
 st.markdown("---")
 
-# Upload del archivo
-tipos_archivo = ['xls', 'xlsx', 'csv'] if banco_seleccionado == "Itaú" else ['xls', 'xlsx']
-uploaded_file = st.file_uploader(
-    f"Selecciona el archivo de movimientos de {banco_seleccionado}", 
-    type=tipos_archivo,
-    help=f"Sube tu planilla de movimientos de {banco_seleccionado}"
-)
+# Layout horizontal: Formulario a la izquierda, Resultados a la derecha
+col_form, col_result = st.columns([1, 1.5])
 
-# Filtro de fecha
-col1, col2 = st.columns([1, 1])
-
-with col1:
+with col_form:
+    st.markdown("### 📝 Configuración")
+    
+    # Selector de banco
+    banco_seleccionado = st.selectbox(
+        "Banco",
+        ["BROU", "Itaú"],
+        help="Elige el banco del cual proviene tu archivo de movimientos"
+    )
+    
+    # Upload del archivo
+    tipos_archivo = ['xls', 'xlsx', 'csv'] if banco_seleccionado == "Itaú" else ['xls', 'xlsx']
+    uploaded_file = st.file_uploader(
+        f"Archivo de {banco_seleccionado}", 
+        type=tipos_archivo,
+        help=f"Sube tu planilla de movimientos de {banco_seleccionado}"
+    )
+    
+    # Filtro de fecha
     usar_filtro = st.checkbox("Filtrar por fecha", value=False)
-
-with col2:
+    
     fecha_filtro = None
     if usar_filtro:
         fecha_filtro = st.date_input(
@@ -266,12 +246,18 @@ with col2:
             value=datetime.date.today() - datetime.timedelta(days=30),
             help="Solo se incluirán movimientos desde esta fecha en adelante"
         )
+    
+    st.markdown("")
+    
+    # Botón de procesamiento
+    procesar_clicked = False
+    if uploaded_file is not None:
+        procesar_clicked = st.button("🚀 Procesar Planilla", type="primary", use_container_width=True)
 
-st.markdown("---")
-
-# Botón de procesamiento
-if uploaded_file is not None:
-    if st.button("🚀 Procesar Planilla", type="primary", use_container_width=True):
+with col_result:
+    if uploaded_file is not None and procesar_clicked:
+        st.markdown("### 📊 Resultado")
+        
         with st.spinner("Procesando archivo..."):
             # Convertir fecha si está seleccionada
             fecha_desde = None
@@ -285,7 +271,7 @@ if uploaded_file is not None:
                 df_resultado = procesar_planilla_itau(uploaded_file, fecha_desde)
             
             if df_resultado is not None and len(df_resultado) > 0:
-                st.success(f"✅ ¡Procesamiento exitoso! {len(df_resultado)} registros procesados")
+                st.success(f"✅ {len(df_resultado)} registros procesados")
                 
                 # Convertir a Excel en memoria
                 output = io.BytesIO()
@@ -303,22 +289,10 @@ if uploaded_file is not None:
                     use_container_width=True
                 )
                 
-                # Vista previa compacta
-                with st.expander("👁️ Ver vista previa de los datos", expanded=False):
-                    st.dataframe(df_resultado.head(10), use_container_width=True)
-                    if len(df_resultado) > 10:
-                        st.caption(f"Mostrando 10 de {len(df_resultado)} registros")
+                # Vista previa
+                st.markdown("**Vista previa:**")
+                st.dataframe(df_resultado.head(10), use_container_width=True, height=350)
+                if len(df_resultado) > 10:
+                    st.caption(f"Mostrando 10 de {len(df_resultado)} registros")
             elif df_resultado is not None:
                 st.warning("⚠️ No se encontraron registros que cumplan con los criterios de filtrado")
-
-# Footer
-st.markdown(
-    """
-    <div style='text-align: center; color: #666;'>
-        <strong>Procesador de Planillas Bancarias</strong><br>
-        BROU & Itaú → Finanzas Personales de ZetaSoftware<br>
-        <small>Convierte extractos bancarios al formato compatible</small>
-    </div>
-    """,
-    unsafe_allow_html=True
-)

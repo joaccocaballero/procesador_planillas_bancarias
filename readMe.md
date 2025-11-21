@@ -2,16 +2,6 @@
 
 🏦 Aplicación web para convertir extractos bancarios de **BROU** e **Itaú** al formato compatible con **Finanzas Personales de ZetaSoftware**.
 
-## ✨ Características
-
-- ✅ Procesamiento automático de extractos de BROU
-- ✅ Procesamiento automático de extractos de Itaú
-- ✅ Filtrado opcional por fecha
-- ✅ Vista previa de resultados
-- ✅ Descarga inmediata en formato Excel
-- ✅ Interfaz web intuitiva
-- ✅ 100% privado (procesamiento en memoria, sin almacenamiento)
-
 ## 🛠️ Tecnologías
 
 - Python 3.13
@@ -48,10 +38,3 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## 📄 Licencia
-
-Proyecto creado para uso con Finanzas Personales de ZetaSoftware.
-
----
-
-Desarrollado con ❤️ para facilitar la gestión financiera personal

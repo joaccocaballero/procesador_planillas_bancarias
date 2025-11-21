@@ -188,7 +188,8 @@ def procesar_planilla_itau(file_data, fecha_desde=None):
                     return None
             
             df_out['fecha_dt'] = df_out['fecha'].apply(parse_fecha)
-            df_out = df_out[df_out['fecha_dt'] >= fecha_desde].copy()
+            # Excluir filas con fecha anterior a fecha_desde (solo mantener >= fecha_desde)
+            df_out = df_out[df_out['fecha_dt'].notna() & (df_out['fecha_dt'] >= fecha_desde)].copy()
             df_out = df_out.drop('fecha_dt', axis=1)
 
         # 7. Ordenar columnas
@@ -254,8 +255,9 @@ with col_form:
     if usar_filtro:
         fecha_filtro = st.date_input(
             "Desde la fecha:",
-            value=datetime.date.today() - datetime.timedelta(days=30),
-            help="Solo se incluirán movimientos desde esta fecha en adelante"
+            value=datetime.date.today(),
+            help="Solo se incluirán movimientos desde esta fecha en adelante",
+            format="DD/MM/YYYY"
         )
     
     st.markdown("")

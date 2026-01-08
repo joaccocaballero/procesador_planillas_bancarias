@@ -85,7 +85,18 @@ def procesar_planilla_brou(file_data, fecha_desde=None):
             df_out = df_out[df_out['fecha_dt'] >= fecha_desde].copy()
             df_out = df_out.drop('fecha_dt', axis=1)
 
-        # 7. Ordenar columnas
+        # 7. Ordenar por fecha (ascendente)
+        def parse_fecha(fecha_str):
+            try:
+                return datetime.datetime.strptime(fecha_str, '%d/%m/%Y')
+            except:
+                return None
+        
+        df_out['fecha_dt'] = df_out['fecha'].apply(parse_fecha)
+        df_out = df_out.sort_values('fecha_dt', ascending=True).copy()
+        df_out = df_out.drop('fecha_dt', axis=1)
+
+        # 8. Ordenar columnas
         columnas_ordenadas = ['fecha', 'descripcion', 'credito', 'debito', 'cotizacion']
         df_final = df_out[columnas_ordenadas]
 
@@ -192,7 +203,18 @@ def procesar_planilla_itau(file_data, fecha_desde=None):
             df_out = df_out[df_out['fecha_dt'].notna() & (df_out['fecha_dt'] >= fecha_desde)].copy()
             df_out = df_out.drop('fecha_dt', axis=1)
 
-        # 7. Ordenar columnas
+        # 7. Ordenar por fecha (ascendente)
+        def parse_fecha_sort(fecha_str):
+            try:
+                return datetime.datetime.strptime(fecha_str, '%d/%m/%Y')
+            except:
+                return None
+        
+        df_out['fecha_dt'] = df_out['fecha'].apply(parse_fecha_sort)
+        df_out = df_out.sort_values('fecha_dt', ascending=True).copy()
+        df_out = df_out.drop('fecha_dt', axis=1)
+        
+        # 8. Ordenar columnas
         columnas_ordenadas = ['fecha', 'descripcion', 'credito', 'debito', 'cotizacion']
         df_final = df_out[columnas_ordenadas]
 
